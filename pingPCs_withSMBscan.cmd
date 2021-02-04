@@ -53,13 +53,17 @@ FOR /F %%i IN (%INPUTFILE%) DO (
   )
 
 echo Scanning %%i using NMap...
-REM nmap -p 445 -Pn -script=smb-os-discovery %%i > "%temp%\nmap.txt"
+nmap -p 445 -Pn -script=smb-os-discovery %%i > "%temp%\nmap.txt"
 echo Scan complete.
 SET NMAP_OS=Not Detected
 SET NMAP_NAME=Not Detected
 SET NMAP_DATETIME=Not Detected
 SET NMAP_DOMAIN=Not Detected
 SET NMAP_HOSTNAME=Not Detected
+
+IF NOT EXIST "%TEMP%\nmap.txt" (
+ echo "%TEMP%\nmap.txt not found!"
+)
 
 FOR /F "tokens=1,2* delims=:" %%j IN ('type ^"%temp%\nmap.txt^"') DO (
 
@@ -84,9 +88,10 @@ IF /I !NMAP_HOSTNAME! EQU %%i (
    SET NMAP_MATCH=FALSE
 )
 
-  echo %%i,!IPAddress!,!result!,!NMAP_HOSTNAME!,!NMAP_DOMAIN!,!NMAP_NAME!,!NMAP_OS!,!NMAP_DATETIME,!NMAP_MATCH!,%DATE%%TIME% >> "%OUTPUTFILE%"
+  echo %%i,!IPAddress!,!result!,!NMAP_HOSTNAME!,!NMAP_DOMAIN!,!NMAP_NAME!,!NMAP_OS!,!NMAP_DATETIME!,!NMAP_MATCH!,%DATE%%TIME% >> "%OUTPUTFILE%"
 )
- 
+
+echo RESET counter
 SET COUNTER=0
 
 :REPEAT
