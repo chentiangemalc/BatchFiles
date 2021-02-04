@@ -1,9 +1,9 @@
-echo off
-Rem pingPCs by malcolm mccaffery – pings all PCs in a text file and logs results to CSV
+@echo off
+Rem pingPCs by malcolm mccaffery - pings all PCs in a text file and logs results to CSV
 REM enabled delayed expansion so we can change variables during batch file execution
 SETLOCAL ENABLEDELAYEDEXPANSION
 
-Rem set the maximum number of runs…
+Rem set the maximum number of runs...
 SET MAXRUNS=5
 
 REM the output CSV file
@@ -18,20 +18,20 @@ echo Computer Name,IP Address,Ping Status,SMB Hostname,SMB Domain,SMB Name,SMB O
 echo Reading computer list from %INPUTFILE%
 echo Saving log to %OUTPUTFILE%
 FOR /F %%i IN (%INPUTFILE%) DO (    
-  echo Pinging %%i…
+  echo Pinging %%i...
   ping %%i > "%temp%\ping.txt"
  
   IF !ERRORLEVEL! EQU 0 (
     REM machine is pingable!
     SET result=SUCCESS
  
-    REM we filter by 'ping statistics’ to get IP because it’s easy to process,
-    REM whether IPv6 or IPv4 it’s consistent across legacy and lates MS OSes
-    REM dummy delims \ as we don’t want it separating any of the output
+    REM we filter by 'ping statistics' to get IP because it's easy to process,
+    REM whether IPv6 or IPv4 it's consistent across legacy and lates MS OSes
+    REM dummy delims \ as we don't want it separating any of the output
     FOR /F "delims=\" %%j IN ('type ^"%temp%\ping.txt^" ^| find ^"Ping statistics^"') DO (
       SET IPAddress=%%j
       SET IPAddress=!IPAddress:~20,-1!
-      echo SUCCESS … !IPAddress!
+      echo SUCCESS ... !IPAddress!
     )
   ) ELSE (
     REM machine is not pingable!
@@ -45,15 +45,15 @@ FOR /F %%i IN (%INPUTFILE%) DO (
       FOR /F "delims=\" %%j IN ('type ^"%temp%\ping.txt^" ^| find ^"Ping statistics^"') DO (
         SET IPAddress=%%j
         SET IPAddress=!IPAddress:~20,-1!
-        echo FAILED … !IPAddress!
+        echo FAILED ... !IPAddress!
       )
     ) ELSE (
-      echo FAILED … NOT FOUND
+      echo FAILED ... NOT FOUND
     )
   )
 
-echo Scanning %%i using NMap…
-REM nmap -p 445 -Pn –script=smb-os-discovery %%i > "%temp%\nmap.txt"
+echo Scanning %%i using NMap...
+REM nmap -p 445 -Pn -script=smb-os-discovery %%i > "%temp%\nmap.txt"
 echo Scan complete.
 SET NMAP_OS=Not Detected
 SET NMAP_NAME=Not Detected
@@ -71,7 +71,7 @@ IF "%%j" EQU "|_  System time" SET NMAP_DATETIME=!VALUE:~1!:%%l
 
 )
 
-FOR /F "tokens=1,2 delims=\" %%j IN ('echo !NMAP_NAME!’) DO (
+FOR /F "tokens=1,2 delims=\" %%j IN ('echo !NMAP_NAME!') DO (
   IF "%%j" NEQ "" (
     SET NMAP_DOMAIN=%%j
     SET NMAP_HOSTNAME=%%k
@@ -102,13 +102,13 @@ copy "%OUTPUTFILE%" "%INPUTFILE%.csv" /y
 IF EXIST "%OUTPUTFILE%.tmp" DEL "%OUTPUTFILE%.tmp"
 Rem Allows for conditional operations in batch processing.
 FOR /F "delims=, TOKENS=1,2,3,4,5,6,7,8,9,10" %%i IN (%INPUTFILE%.csv) DO (    
-  Rem only retry failed machines…
+  Rem only retry failed machines...
   SET RETRY=FALSE
  
   Rem if ping failed last time, retry
   IF "%%k" EQU "FAILED" SET RETRY=TRUE
  
-  Rem if nmap match successed last time, then don’t retry
+  Rem if nmap match successed last time, then don't retry
   IF "%%q" EQU "TRUE" SET RETRY=FALSE
  
   Rem if nmap match failed last time, retry
@@ -116,21 +116,21 @@ FOR /F "delims=, TOKENS=1,2,3,4,5,6,7,8,9,10" %%i IN (%INPUTFILE%.csv) DO (
  
   IF "!RETRY!" EQU "TRUE" (
     Rem Allows for conditional operations in batch processing.
-    echo Pinging %%i…
+    echo Pinging %%i...
     ping %%i > "%temp%\ping.txt"
    
     IF !ERRORLEVEL! EQU 0 (
       REM machine is pingable!
       SET result=SUCCESS
    
-      REM we filter by 'ping statistics’ to get IP because it’s easy to process,
-      REM whether IPv6 or IPv4 it’s consistent across legacy and lates MS OSes
-      REM dummy delims \ as we don’t want it separating any of the output
+      REM we filter by 'ping statistics' to get IP because it's easy to process,
+      REM whether IPv6 or IPv4 it's consistent across legacy and lates MS OSes
+      REM dummy delims \ as we don't want it separating any of the output
       REM May need to change ,-1 to ,-2 on XP pinging IPv4 machines to remove trailing :
       FOR /F "delims=\" %%x IN ('type ^"%temp%\ping.txt^" ^| find ^"Ping statistics^"') DO (
         SET IPAddress=%%x
         SET IPAddress=!IPAddress:~20,-1!
-        echo SUCCESS … !IPAddress!
+        echo SUCCESS ... !IPAddress!
       )
     ) ELSE (
       REM machine is not pingable!
@@ -145,16 +145,16 @@ FOR /F "delims=, TOKENS=1,2,3,4,5,6,7,8,9,10" %%i IN (%INPUTFILE%.csv) DO (
         FOR /F "delims=\" %%x IN ('type ^"%temp%\ping.txt^" ^| find ^"Ping statistics^"') DO (
           SET IPAddress=%%x
           SET IPAddress=!IPAddress:~20,-1!
-          echo FAILED … !IPAddress!
+          echo FAILED ... !IPAddress!
         )
       ) ELSE (
-        echo FAILED … NOT FOUND
+        echo FAILED ... NOT FOUND
       )
     )
  
 
-echo Scanning %%i using NMap…
-REM nmap -p 445 -Pn –script=smb-os-discovery %%i > "%temp%\nmap.txt"
+echo Scanning %%i using NMap...
+REM nmap -p 445 -Pn -script=smb-os-discovery %%i > "%temp%\nmap.txt"
 echo Scan complete.
 SET NMAP_OS=Not Detected
 SET NMAP_NAME=Not Detected
@@ -172,7 +172,7 @@ IF "%%x" EQU "|_  System time" SET NMAP_DATETIME=!VALUE:~1!:%%z
 
 )
 
-FOR /F "tokens=1,2 delims=\" %%x IN ('echo !NMAP_NAME!’) DO (
+FOR /F "tokens=1,2 delims=\" %%x IN ('echo !NMAP_NAME!') DO (
   IF "%%x" NEQ "" (
     SET NMAP_DOMAIN=%%x
     SET NMAP_HOSTNAME=%%y
